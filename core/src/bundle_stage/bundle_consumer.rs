@@ -692,6 +692,10 @@ impl BundleConsumer {
             &bundle_execution_results,
         );
         let (cu_used, lamports_paid) = economics.unwrap_or_default();
+        println!(
+            "{}: {economics:?}",
+            locked_bundle.sanitized_bundle().bundle_id
+        );
 
         if let Err(e) = bundle_execution_results.result() {
             if !include_reverted {
@@ -887,12 +891,16 @@ impl BundleConsumer {
                 .filter(|(key, _)| tip_accounts.contains(key))
             {
                 let tip = post.saturating_sub(*pre);
+                println!("{tip}");
                 lamports_paid = lamports_paid.saturating_add(tip);
             }
 
             // Compute the TX base + priority fee.
             let cost = cost.as_ref().ok()?;
+            println!("cost: {}", cost.sum());
+            println!("executed_units: {}", execution.details()?.executed_units);
             let fee = bank_start.working_bank.get_fee_for_message(tx.message())?;
+            println!("fee: {fee}");
             let total_cu = cost
                 .sum()
                 .saturating_add(execution.details()?.executed_units);
